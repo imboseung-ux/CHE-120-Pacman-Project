@@ -84,7 +84,7 @@ def valid(point):
         return False
 
     return point.x % 20 == 0 or point.y % 20 == 0
-
+#----------------------ES Comment Ends Here------------------------------------
 
 def world():
     """Draw world using path."""
@@ -127,7 +127,7 @@ def move():
     up()
     goto(pacman.x + 10, pacman.y + 10)
     dot(20, 'yellow')
-
+#----------------------SC Comment Ends Here------------------------------------
     for point, course in ghosts:
         if valid(point + course):
             point.move(course)
@@ -176,3 +176,4 @@ onkey(lambda: change(0, -5), 'Down')
 world()
 move()
 done()
+#----------------------CJ Comment Ends Here------------------------------------
