@@ -14,12 +14,13 @@ from random import choice #BK: This is for random ghost movement
 from turtle import *      #BK: Turtle Graphic
 
 from freegames import floor, vector #BK: Vector math + grid allignment from freegames
-SPEED = 5
-score_ = {'score': 0} #BK: display the score as zero when the game starts
+SPEED = 5 #BK: Speed is set to 5 as of now, we can change the speed to make the pacman go faster and slower
+score_ = {'score': 0} #BK: Display the score as zero when the game starts
 path = Turtle(visible=False) 
 writer = Turtle(visible=False)
-pacman_dir = vector(5, 0) #BK: pacman's direction of movement
-pacman = vector(-40, -80) #BK: this is where the pacman start(starting position)
+pacman_dir = vector(5, 0) #BK: Pacman's direction of movement
+pacman = vector(-40, -80) #BK: This is where the pacman start(starting position)
+#BK: Starting position of the ghost
 ghosts = [
     [vector(-180, 160), vector(5, 0)],
     [vector(-180, -160), vector(0, 5)],
