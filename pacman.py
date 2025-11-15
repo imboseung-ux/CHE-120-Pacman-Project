@@ -10,23 +10,23 @@ Exercises
 5. Make the ghosts smarter.
 """
 
-from random import choice
-from turtle import *
-from freegames import floor, vector
+from random import choice #BK: This is for random ghost movement
+from turtle import * #BK: Turtle Graphic
+from freegames import floor, vector #BK: Vector math + grid allignment from freegames
 
 # ---------------------- GAME SETTINGS ----------------------
-SPEED = 5  # Change this number to make Pacman faster or slower
+SPEED = 5  # BK: Change this number to make Pacman faster or slower
 
 # ---------------------- GAME STATE ------------------------
-score_ = {'score': 0}
+score_ = {'score': 0} #BK: display the score as zero when the game starts
 
 # ---------------------- TURTLE SETUP ---------------------
 path = Turtle(visible=False)   # For drawing maze
 writer = Turtle(visible=False) # For showing score
 
 # Pacman starting position and direction
-pacman = vector(-40, -80)
-pacman_dir = vector(SPEED, 0)  # Uses SPEED variable
+pacman = vector(-40, -80) #BK: pacman's direction of movement
+pacman_dir = vector(SPEED, 0)  # Uses SPEED variable #BK: this is where the pacman start(starting position)
 
 # Ghosts with starting positions and directions
 ghosts = [
@@ -37,6 +37,7 @@ ghosts = [
 ]
 
 # ---------------------- MAP ------------------------------
+#BK: Make a map 20 by 20 grid using 0 which is a wall, and 1 which is the tile
 tiles = [
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0,
