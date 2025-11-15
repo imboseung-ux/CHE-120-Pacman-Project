@@ -10,23 +10,33 @@ Exercises
 5. Make the ghosts smarter.
 """
 
-from random import choice #BK: This is for random ghost movement
-from turtle import *      #BK: Turtle Graphic
+from random import choice
+from turtle import *
+from freegames import floor, vector
 
-from freegames import floor, vector #BK: Vector math + grid allignment from freegames
+# ---------------------- GAME SETTINGS ----------------------
+SPEED = 5  # Change this number to make Pacman faster or slower
 
-score_ = {'score': 0} #BK: display the score as zero when the game starts
-path = Turtle(visible=False) 
-writer = Turtle(visible=False)
-pacman_dir = vector(5, 0) #BK: pacman's direction of movement
-pacman = vector(-40, -80) #BK: this is where the pacman start(starting position)
+# ---------------------- GAME STATE ------------------------
+score_ = {'score': 0}
+
+# ---------------------- TURTLE SETUP ---------------------
+path = Turtle(visible=False)   # For drawing maze
+writer = Turtle(visible=False) # For showing score
+
+# Pacman starting position and direction
+pacman = vector(-40, -80)
+pacman_dir = vector(SPEED, 0)  # Uses SPEED variable
+
+# Ghosts with starting positions and directions
 ghosts = [
-    [vector(-180, 160), vector(5, 0)],
-    [vector(-180, -160), vector(0, 5)],
-    [vector(100, 160), vector(0, -5)],
-    [vector(100, -160), vector(-5, 0)],
+    [vector(-180, 160), vector(SPEED, 0)],
+    [vector(-180, -160), vector(0, SPEED)],
+    [vector(100, 160), vector(0, -SPEED)],
+    [vector(100, -160), vector(-SPEED, 0)],
 ]
-#BK: Make a map 20 by 20 grid using 0 which is a wall and 1 which is the tile
+
+# ---------------------- MAP ------------------------------
 tiles = [
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0,
@@ -49,138 +59,161 @@ tiles = [
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 ]
-#----------------------BK Comment Ends Here------------------------------------
+
+# ---------------------- DRAWING FUNCTIONS -----------------
 def square(x, y):
-    """Draw square using path at (x, y)."""
     path.up()
     path.goto(x, y)
     path.down()
     path.begin_fill()
-
-    for count in range(4):
-        path.forward(20)
-        path.left(90)
-
+    path.forward(20)
+    path.left(90)
+    path.forward(20)
+    path.left(90)
+    path.forward(20)
+    path.left(90)
+    path.forward(20)
+    path.left(90)
     path.end_fill()
 
-
 def offset(point):
-    """Return offset of point in tiles."""
     x = (floor(point.x, 20) + 200) / 20
     y = (180 - floor(point.y, 20)) / 20
     index = int(x + y * 20)
     return index
 
-
 def valid(point):
-    """Return True if point is valid in tiles."""
     index = offset(point)
-
     if tiles[index] == 0:
         return False
-
-    index = offset(point + 19)
-
+    index = offset(vector(point.x + 19, point.y + 19))
     if tiles[index] == 0:
         return False
-
-    return point.x % 20 == 0 or point.y % 20 == 0
-#----------------------ES Comment Ends Here------------------------------------
+    if point.x % 20 == 0 or point.y % 20 == 0:
+        return True
+    else:
+        return False
 
 def world():
-    """Draw world using path."""
     bgcolor('black')
     path.color('blue')
-
     for index in range(len(tiles)):
         tile = tiles[index]
-
         if tile > 0:
             x = (index % 20) * 20 - 200
             y = 180 - (index // 20) * 20
             square(x, y)
-
             if tile == 1:
                 path.up()
                 path.goto(x + 10, y + 10)
                 path.dot(2, 'white')
 
+# ---------------------- GAME OVER -------------------------
+def game_over():
+    path.up()
+    path.goto(-100, 0)
+    path.color('white')
+    path.write("GAME OVER!", font=("Arial", 20, "bold"))
+    path.goto(-100, -30)
+    path.write("Press R to restart or Q to quit", font=("Arial", 12, "normal"))
+    listen()
+    onkey(restart_game, "r")
+    onkey(exit_game, "q")
 
+def restart_game():
+    global pacman, pacman_dir, ghosts, score_, tiles
+    pacman = vector(-40, -80)
+    pacman_dir = vector(SPEED, 0)
+    ghosts = [
+        [vector(-180, 160), vector(SPEED, 0)],
+        [vector(-180, -160), vector(0, SPEED)],
+        [vector(100, 160), vector(0, -SPEED)],
+        [vector(100, -160), vector(-SPEED, 0)],
+    ]
+    # Reset tiles manually
+    new_tiles = []
+    for t in tiles:
+        if t == 2:
+            new_tiles.append(1)
+        else:
+            new_tiles.append(t)
+    tiles = new_tiles
+    score_ = {'score': 0}
+    clear()
+    writer.clear()
+    writer.goto(160, 160)
+    writer.color('white')
+    writer.write(score_['score'])
+    world()
+    move()
+
+def exit_game():
+    bye()
+
+# ---------------------- GAME LOOP -------------------------
 def move():
-    """Move pacman and all ghosts."""
     writer.undo()
     writer.write(score_['score'])
-
     clear()
-
-    if valid(pacman + pacman_dir):
-        pacman.move(pacman_dir)
-
+    
+    if valid(vector(pacman.x + pacman_dir.x, pacman.y + pacman_dir.y)):
+        pacman.x = pacman.x + pacman_dir.x
+        pacman.y = pacman.y + pacman_dir.y
+    
     index = offset(pacman)
-
     if tiles[index] == 1:
         tiles[index] = 2
-        score_['score'] += 1
+        score_['score'] = score_['score'] + 1
         x = (index % 20) * 20 - 200
         y = 180 - (index // 20) * 20
         square(x, y)
-
+    
     up()
     goto(pacman.x + 10, pacman.y + 10)
     dot(20, 'yellow')
-#----------------------SC Comment Ends Here------------------------------------
-    for point, course in ghosts:
-        if valid(point + course):
-            point.move(course)
+    
+    for ghost in ghosts:
+        point = ghost[0]
+        course = ghost[1]
+        if valid(vector(point.x + course.x, point.y + course.y)):
+            point.x = point.x + course.x
+            point.y = point.y + course.y
         else:
-            options = [
-                vector(5, 0),
-                vector(-5, 0),
-                vector(0, 5),
-                vector(0, -5),
-            ]
-            plan = choice(options)
+            plan = choice([vector(SPEED,0), vector(-SPEED,0), vector(0,SPEED), vector(0,-SPEED)])
             course.x = plan.x
             course.y = plan.y
-
         up()
         goto(point.x + 10, point.y + 10)
         dot(20, 'red')
-
+    
     update()
-
-    for point, course in ghosts:
-        if abs(pacman - point) < 20:
+    
+    for ghost in ghosts:
+        point = ghost[0]
+        if abs(pacman.x - point.x) < 20 and abs(pacman.y - point.y) < 20:
+            game_over()
             return
+    
+    ontimer(move, 20)
 
-    ontimer(move, 100)
-
-
+# ---------------------- CONTROLS -------------------------
 def change(x, y):
-    """Change pacman, pacman_dir if valid."""
-    if valid(pacman + vector(x, y)):
+    if valid(vector(pacman.x + x, pacman.y + y)):
         pacman_dir.x = x
         pacman_dir.y = y
 
-setup(420, 420, 370, 0)
+# ---------------------- INITIALIZE -----------------------
+setup(470, 450, 450, 0)
 hideturtle()
 tracer(False)
 writer.goto(160, 160)
 writer.color('white')
-writer.write(state['score'])
-#CJ: This function tells python to start detecting keyboard inputs
+writer.write(score_['score'])
 listen()
-#CJ: The following four lines detects if the user has pressed an arrow key.  They are denoted by the last argument of the function
-#Such as "Right" being the right arrow key.  Onkey works using two arguments.  When the key specified in the last one is pressed,
-#It will run the function in the first argument.  Since the onkey function wants a function and not the result of a function, lambda
-#is used to create a nameless function that when run, calls the change function.  For example, since change(5,0) is not a funcition, but
-#the result of a function, it will not work with the onkey function as intended.  It wants to call the change function when the right arrow
-#key is pressed, not run whatever the result of it is.
-onkey(lambda: change(5, 0), 'Right')
-onkey(lambda: change(-5, 0), 'Left')
-onkey(lambda: change(0, 5), 'Up')
-onkey(lambda: change(0, -5), 'Down')
+onkey(lambda: change(SPEED,0), "Right")
+onkey(lambda: change(-SPEED,0), "Left")
+onkey(lambda: change(0,SPEED), "Up")
+onkey(lambda: change(0,-SPEED), "Down")
 world()
 move()
 done()
-#----------------------CJ Comment Ends Here------------------------------------
