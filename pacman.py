@@ -15,11 +15,11 @@ from turtle import *      #BK: Turtle Graphic
 
 from freegames import floor, vector #BK: Vector math + grid allignment from freegames
 
-state = {'score': 0}
-path = Turtle(visible=False)
+score_ = {'score': 0} #BK: display the score as zero when the game starts
+path = Turtle(visible=False) 
 writer = Turtle(visible=False)
-aim = vector(5, 0)
-pacman = vector(-40, -80)
+pacman_dir = vector(5, 0) #BK: pacman's direction of movement
+pacman = vector(-40, -80) #BK: this is where the pacman start(starting position)
 ghosts = [
     [vector(-180, 160), vector(5, 0)],
     [vector(-180, -160), vector(0, 5)],
@@ -109,18 +109,18 @@ def world():
 def move():
     """Move pacman and all ghosts."""
     writer.undo()
-    writer.write(state['score'])
+    writer.write(score_['score'])
 
     clear()
 
-    if valid(pacman + aim):
-        pacman.move(aim)
+    if valid(pacman + pacman_dir):
+        pacman.move(pacman_dir)
 
     index = offset(pacman)
 
     if tiles[index] == 1:
         tiles[index] = 2
-        state['score'] += 1
+        score_['score'] += 1
         x = (index % 20) * 20 - 200
         y = 180 - (index // 20) * 20
         square(x, y)
@@ -157,10 +157,10 @@ def move():
 
 
 def change(x, y):
-    """Change pacman aim if valid."""
+    """Change pacman, pacman_dir if valid."""
     if valid(pacman + vector(x, y)):
-        aim.x = x
-        aim.y = y
+        pacman_dir.x = x
+        pacman_dir.y = y
 
 
 setup(420, 420, 370, 0)
