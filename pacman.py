@@ -194,7 +194,7 @@ def move():
     
     ontimer(move, 20)
     
-    # ---------------------- CONTROLS -------------------------
+# ---------------------- CONTROLS -------------------------
 
 def change(x, y):
     """Change pacman, pacman_dir if valid."""
