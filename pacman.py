@@ -118,35 +118,54 @@ def game_over():
     path.goto(-100, -30)
     path.write("Press R to restart or Q to quit", font=("Arial", 12, "normal"))
     listen()
-    onkey(restart_game, "r")
+    onkey(restart, "r")
     onkey(exit_game, "q")
 
-def restart_game():
-    global pacman, pacman_dir, ghosts, score_, tiles
-    pacman = vector(-40, -80)
-    pacman_dir = vector(SPEED, 0)
-    ghosts = [
-        [vector(-180, 160), vector(SPEED, 0)],
-        [vector(-180, -160), vector(0, SPEED)],
-        [vector(100, 160), vector(0, -SPEED)],
-        [vector(100, -160), vector(-SPEED, 0)],
-    ]
-    # Reset tiles manually
-    new_tiles = []
-    for t in tiles:
-        if t == 2:
-            new_tiles.append(1)
-        else:
-            new_tiles.append(t)
-    tiles = new_tiles
-    score_ = {'score': 0}
-    clear()
-    writer.clear()
-    writer.goto(160, 160)
-    writer.color('white')
-    writer.write(score_['score'])
-    world()
-    move()
+def restart():
+    """Restart the game"""
+    global game_over, pacman, pacman_dir, ghosts, score_
+    if game_over:
+        path.clear()  # Remove Game Over text
+        game_over = False
+        score_['score'] = 0
+        writer.clear()
+        writer.goto(160, 160)
+        writer.write(score_['score'])
+
+        # Reset Pacman to starting position and full speed
+        pacman.x = -40
+        pacman.y = -80
+        pacman_dir.x = SPEED
+        pacman_dir.y = 0
+
+        # Reset ghosts to starting positions and full speed
+        ghosts[0][0].x = -180
+        ghosts[0][0].y = 160
+        ghosts[0][1].x = SPEED
+        ghosts[0][1].y = 0
+
+        ghosts[1][0].x = -180
+        ghosts[1][0].y = -160
+        ghosts[1][1].x = 0
+        ghosts[1][1].y = SPEED
+
+        ghosts[2][0].x = 100
+        ghosts[2][0].y = 160
+        ghosts[2][1].x = 0
+        ghosts[2][1].y = SPEED
+
+        ghosts[3][0].x = 100
+        ghosts[3][0].y = -160
+        ghosts[3][1].x = SPEED
+        ghosts[3][1].y = 0
+
+        # Reset map dots
+        for i in range(len(tiles)):
+            if tiles[i] == 2:   # restore eaten dots
+                tiles[i] = 1
+
+        world()
+        move()
 
 def exit_game():
     bye()
