@@ -95,19 +95,19 @@ def valid(point):
     else:
         return False
 
-def world(): #SC: The function creates the overall game board for the Pac-Man game, so the maze with its walls, as well as the dots
-    bgcolor('black')  #SC: Sets the background color for the game as black
-    path.color('blue')  #SC: Sets the maze path color blue to tell the difference between the path and the walls
-    for index in range(len(tiles)): #SC: This is a for loop that loops through all the tiles in the map. Since there are 400 tiles in the map, it will loop through this function 400 times
-        tile = tiles[index] #SC: Sets a new variable for each specific tile due to the index going through all 400 positions
-        if tile > 0: #SC: If statement, if the tile is a one on the map (the 20x20 grid above), also converting the 1D list to a 2D grid postion which is why you need to %20 and //20 to convert to column and row
-            x = (index % 20) * 20 - 200  #SC: Since the x-coordinate system works the same in code and in the game, to center the game, the x coordinates need to shift over -200, the *20 converts grid units to pixels
-            y = 180 - (index // 20) * 20  #SC: Y-coordinate system for the game is inversely proportional to the computer coordinate system, so that is why you need to inverse it
-            square(x, y) #SC: At that postion draws a blue pathway for pac-man to go on to
-            if tile == 1: #SC: If statement, if the tile is equal to one which represenets the white pellet/dot
-                path.up() #SC: lifts the "pen" or object/turtle's pen so it doesn't draw anything
-                path.goto(x + 10, y + 10) #SC: moves the "pen" to the center of the cell
-                path.dot(2, 'white') #SC: Draws the white dot/pellet for the Pac-Man to eat
+def world(): 
+    bgcolor('black')  
+    path.color('blue') 
+    for index in range(len(tiles)): 
+        tile = tiles[index] 
+        if tile > 0: 
+            x = (index % 20) * 20 - 200  
+            y = 180 - (index // 20) * 20  
+            square(x, y) 
+            if tile == 1: 
+                path.up()
+                path.goto(x + 10, y + 10) 
+                path.dot(2, 'white') 
 
 # ---------------------- GAME OVER -------------------------
 def game_over():
@@ -171,50 +171,50 @@ def exit_game():
     bye()
 
 # ---------------------- GAME LOOP -------------------------
-def move(): #SC: This function runs the entire game, as it does movement for everything and the game logic for the game
-    writer.undo() #SC: clears the last thing the writer wrote, aka the score
-    writer.write(score_['score']) #SC: writes the new current score of the game
-    clear() #SC: Clears all moving elements of the game, but not things drawn in the world function as they do not change 
+def move(): 
+    writer.undo() 
+    writer.write(score_['score']) 
+    clear() 
     
-    if valid(vector(pacman.x + pacman_dir.x, pacman.y + pacman_dir.y)): #SC: this is how Pac-Man moves and how it detects collisions coming from valid checking if it's not a wall, the vector packages both of these into a position object
-        pacman.x = pacman.x + pacman_dir.x  #SC: pacman.x calculates the x-position of the pacman in the next frame
-        pacman.y = pacman.y + pacman_dir.y  #SC: does the same as pacman.x but for the y-coordinate 
+    if valid(vector(pacman.x + pacman_dir.x, pacman.y + pacman_dir.y)): 
+        pacman.x = pacman.x + pacman_dir.x  
+        pacman.y = pacman.y + pacman_dir.y  
     
-    index = offset(pacman) #SC: recalls the offset function, translating the pixel position of Pac-Man to the grid index to tell the game what Pac-Man is standing on
-    if tiles[index] == 1:  #SC: If statement, if the tile Pac-Man is on is a dot(because of the 1 on the grid)
-        tiles[index] = 2  #SC: This marks the dot as collected, so it will no longer show up
-        score_['score'] = score_['score'] + 1  #SC: updates the score after the dot has been collected
-        x = (index % 20) * 20 - 200  #SC: the position is then redrawn with another square, with the dot no longer appearing with the square function
+    index = offset(pacman) 
+    if tiles[index] == 1:  
+        tiles[index] = 2  
+        score_['score'] = score_['score'] + 1  
+        x = (index % 20) * 20 - 200  
         y = 180 - (index // 20) * 20
         square(x, y)
     
-    up()  #SC: Lifts the "pen" of the object or turtle's pen so it stops drawing
-    goto(pacman.x + 10, pacman.y + 10)  #SC: Goes to the center of the cell 
-    dot(20, 'yellow')  #SC: Draws the pacman as the yellow dot in the center of the cell
+    up()  
+    goto(pacman.x + 10, pacman.y + 10) 
+    dot(20, 'yellow')  
     
-    for ghost in ghosts:  #SC: Ghost movement loop/ movement AI
-        point = ghost[0] #SC: the position point of the ghost with a list containing its x and y coordinates
-        course = ghost[1] #SC: the direction of the ghost  with its x and y properties
-        if valid(vector(point.x + course.x, point.y + course.y)): #SC: calculates the ghosts' next position, checking if it's valid or not, so not a wall
-            point.x = point.x + course.x #SC: if the next position is valid, it continues in that direction in both x and y
+    for ghost in ghosts:  
+        point = ghost[0] 
+        course = ghost[1] 
+        if valid(vector(point.x + course.x, point.y + course.y)): 
+            point.x = point.x + course.x 
             point.y = point.y + course.y
-        else: #SC: if the ghost is blocked (the new position is not valid)
-            plan = choice([vector(SPEED,0), vector(-SPEED,0), vector(0,SPEED), vector(0,-SPEED)]) #SC: randomly picks a new choice out of the 4 available, left, right, up, or down
-            course.x = plan.x #SC: these then make the ghost go in the desired direction. If the new direction the ghost chooses is also a wall, it chooses a new direction until a valid direction is chosen
+        else:
+            plan = choice([vector(SPEED,0), vector(-SPEED,0), vector(0,SPEED), vector(0,-SPEED)]) 
+            course.x = plan.x 
             course.y = plan.y
-        up() #SC: Lifts the "pen" of the object or turtle's pen so it stops drawing
-        goto(point.x + 10, point.y + 10)  #SC: Goes to the center of the cell 
-        dot(20, 'red') #SC: draws the ghost as a red dot
+        up() 
+        goto(point.x + 10, point.y + 10)  
+        dot(20, 'red') 
     
-    update() #SC: this function then refreshes the graphics, so it gives all the latest changes
+    update() 
     
-    for ghost in ghosts: #SC: this for ghost in ghosts loop is for collision detection of the ghost and Pac-Man
-        point = ghost[0] #SC: Grabs the ghost's current position
-        if abs(pacman.x - point.x) < 20 and abs(pacman.y - point.y) < 20: #SC: This if statement checks if Pac-Man and a ghost are within 20 pixels both vertically and horizontally of each other
-            game_over() #SC: if both are true, then there is a collision and the game ends
-            return #SC: if the collision is detected, it stops the move function and doesn't execute the next frame, and the onTimer function won't be called
+    for ghost in ghosts: 
+        point = ghost[0] 
+        if abs(pacman.x - point.x) < 20 and abs(pacman.y - point.y) < 20: 
+            game_over() 
+            return 
     
-    ontimer(move, 20) #SC: schedules the next frame to run after 20 milliseconds 
+    ontimer(move, 20) 
 
 # ---------------------- CONTROLS -------------------------
 def change(x, y):
