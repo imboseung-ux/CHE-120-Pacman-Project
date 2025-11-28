@@ -10,15 +10,21 @@ Exercises
 5. Make the ghosts smarter.
 """
 
-from random import choice #BK: This is for random ghost movement
+from random import * #BK: This is for random ghost movement
 from turtle import * #BK: Turtle Graphic
 from freegames import floor, vector #BK: Vector math + grid allignment from freegames
 
 # ---------------------- GAME SETTINGS ----------------------
 SPEED = 5  # BK: Change this number to make Pacman faster or slower
+ghost_SPEED = 5
+
+freeze_active = False
+ghost_colour = 'red'
 
 # ---------------------- GAME STATE ------------------------
 score_ = {'score': 0} #BK: display the score as zero when the game starts
+
+game_over_flag = False
 
 # ---------------------- TURTLE SETUP ---------------------
 path = Turtle(visible=False)   # For drawing maze
@@ -30,10 +36,10 @@ pacman_dir = vector(SPEED, 0)  # Uses SPEED variable #BK: this is where the pacm
 
 # Ghosts with starting positions and directions
 ghosts = [
-    [vector(-180, 160), vector(SPEED, 0)],
-    [vector(-180, -160), vector(0, SPEED)],
-    [vector(100, 160), vector(0, -SPEED)],
-    [vector(100, -160), vector(-SPEED, 0)],
+    [vector(-180, 160), vector(ghost_SPEED, 0)],
+    [vector(-180, -160), vector(0, ghost_SPEED)],
+    [vector(100, 160), vector(0, -ghost_SPEED)],
+    [vector(100, -160), vector(-ghost_SPEED, 0)],
 ]
 
 # ---------------------- MAP ------------------------------
@@ -60,6 +66,43 @@ tiles = [
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 ]
+
+tiles_copy = tiles.copy()
+
+#----------------------ADDING POWERUP-------------------------
+#CJ: choose a random spot to be a speed powerup
+def create_powerups():
+    randomtile = 0
+    while True:
+        randomtile = randint(0,len(tiles)-1) #CJ: gets random index from the list
+        if tiles[randomtile] == 1: #CJ: makes sure its not a wall
+            tiles[randomtile] = 3
+            
+            x = (randomtile % 20) * 20 - 200
+            y = 180 - (randomtile // 20) * 20
+
+            path.up()
+            path.goto(x + 10, y + 10)
+            path.dot(8, 'cyan')
+               
+            break
+        
+create_powerups()
+
+def unfreeze_ghosts():
+    global freeze_active,ghost_colour
+    
+    ghost_colour = 'red'
+    freeze_active = False
+    create_powerups()
+    
+
+def freeze_ghosts(time=8000):
+    global freeze_active,ghost_colour
+    
+    freeze_active = True
+    ghost_colour = 'cyan'
+    ontimer(unfreeze_ghosts,time)
 
 # ---------------------- DRAWING FUNCTIONS -----------------
 def square(x, y): 
@@ -108,9 +151,16 @@ def world():
                 path.up()
                 path.goto(x + 10, y + 10) 
                 path.dot(2, 'white') 
+                
+            if tile == 3:
+                path.up()
+                path.goto(x + 10, y + 10)
+                path.dot(8, 'cyan') 
 
 # ---------------------- GAME OVER -------------------------
 def game_over():
+    global game_over_flag
+    game_over_flag = True
     path.up()
     path.goto(-100, 0)
     path.color('white')
@@ -122,6 +172,8 @@ def game_over():
     onkey(exit_game, "q")
     
 def win():
+    global game_over_flag
+    game_over_flag = True
     path.up()
     path.goto(-100, 0)
     path.color('white')
@@ -135,10 +187,10 @@ def win():
 
 def restart():
     """Restart the game"""
-    global game_over, pacman, pacman_dir, ghosts, score_, win
-    if game_over or win:
+    global game_over_flag, pacman, pacman_dir, ghosts, score_, tiles, tiles_copy
+    if game_over_flag:
         path.clear()  # Remove Game Over text
-        game_over = False
+        game_over_flag = False
         score_['score'] = 0
         writer.clear()
         writer.goto(160, 160)
@@ -153,29 +205,33 @@ def restart():
         # Reset ghosts to starting positions and full speed
         ghosts[0][0].x = -180
         ghosts[0][0].y = 160
-        ghosts[0][1].x = SPEED
+        ghosts[0][1].x = ghost_SPEED
         ghosts[0][1].y = 0
 
         ghosts[1][0].x = -180
         ghosts[1][0].y = -160
         ghosts[1][1].x = 0
-        ghosts[1][1].y = SPEED
+        ghosts[1][1].y = ghost_SPEED
 
         ghosts[2][0].x = 100
         ghosts[2][0].y = 160
         ghosts[2][1].x = 0
-        ghosts[2][1].y = SPEED
+        ghosts[2][1].y = ghost_SPEED
 
         ghosts[3][0].x = 100
         ghosts[3][0].y = -160
-        ghosts[3][1].x = SPEED
+        ghosts[3][1].x = ghost_SPEED
         ghosts[3][1].y = 0
 
-        # Reset map dots
+        # Reset map
+        tiles = tiles_copy
+        
         for i in range(len(tiles)):
-            if tiles[i] == 2:   # restore eaten dots
+            if tiles[i] != 0:
                 tiles[i] = 1
-
+            
+        create_powerups()
+        
         world()
         move()
     
@@ -200,6 +256,13 @@ def move():
         x = (index % 20) * 20 - 200  
         y = 180 - (index // 20) * 20
         square(x, y)
+        
+    if tiles[index] == 3:
+        tiles[index] = 2   # remove power-up
+        x = (index % 20) * 20 - 200  
+        y = 180 - (index // 20) * 20
+        square(x, y)
+        freeze_ghosts()
     
     up()  
     goto(pacman.x + 10, pacman.y + 10) 
@@ -208,16 +271,19 @@ def move():
     for ghost in ghosts:  
         point = ghost[0] 
         course = ghost[1] 
-        if valid(vector(point.x + course.x, point.y + course.y)): 
-            point.x = point.x + course.x 
-            point.y = point.y + course.y
-        else:
-            plan = choice([vector(SPEED,0), vector(-SPEED,0), vector(0,SPEED), vector(0,-SPEED)]) 
-            course.x = plan.x 
-            course.y = plan.y
+        
+        if not freeze_active:
+            if valid(vector(point.x + course.x, point.y + course.y)): 
+                point.x = point.x + course.x 
+                point.y = point.y + course.y
+            else:
+                plan = choice([vector(ghost_SPEED,0), vector(-ghost_SPEED,0), vector(0,ghost_SPEED), vector(0,-ghost_SPEED)]) 
+                course.x = plan.x 
+                course.y = plan.y
+                
         up() 
         goto(point.x + 10, point.y + 10)  
-        dot(20, 'red') 
+        dot(20, ghost_colour) 
     
     update() 
     
