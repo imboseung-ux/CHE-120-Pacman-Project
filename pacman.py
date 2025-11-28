@@ -120,11 +120,23 @@ def game_over():
     listen()
     onkey(restart, "r")
     onkey(exit_game, "q")
+    
+def win():
+    path.up()
+    path.goto(-100, 0)
+    path.color('white')
+    path.write("YOU WON!", font=("Arial", 20, "bold"))
+    path.goto(-100, -30)
+    path.write("Press R to restart or Q to quit", font=("Arial", 12, "normal"))
+    listen()
+    onkey(restart, "r")
+    onkey(exit_game, "q")
+
 
 def restart():
     """Restart the game"""
-    global game_over, pacman, pacman_dir, ghosts, score_
-    if game_over:
+    global game_over, pacman, pacman_dir, ghosts, score_, win
+    if game_over or win:
         path.clear()  # Remove Game Over text
         game_over = False
         score_['score'] = 0
@@ -166,6 +178,7 @@ def restart():
 
         world()
         move()
+    
 
 def exit_game():
     bye()
@@ -213,6 +226,15 @@ def move():
         if abs(pacman.x - point.x) < 20 and abs(pacman.y - point.y) < 20: 
             game_over() 
             return 
+    pellets_remaining = False
+    for tile in tiles:
+        if tile == 1:
+            pellets_remaining = True
+            break
+     
+    if not pellets_remaining:
+         win()
+         return
     
     ontimer(move, 20) 
 
