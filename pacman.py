@@ -1,4 +1,4 @@
-#Steven Everett Chris Bradly
+#Steven Everett Chris Bradley
 """Pacman, classic arcade game.
 
 Exercises
